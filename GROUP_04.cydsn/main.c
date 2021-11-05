@@ -17,14 +17,21 @@ uint8_t slaveBuffer[SLAVE_BUFFER_SIZE];
 
 int main(void)
 {
-    CyGlobalIntEnable; /* Enable global interrupts. */
-
+    /* Enable global interrupts. */
+    CyGlobalIntEnable;
+    
+    Timer_ADC_Start();
+    
+    isr_Timer_StartEx(Custom_Timer_Count_ISR);
+    
     /* Start EZI2C Component */
     EZI2C_Start();
+   
+    AMux_Start();
     ADC_DelSig_Start();
-    /* Start timer and associated ISR */
-    Timer_ADC_Start();
-    isr_Timer_StartEx(Custom_Timer_Count_ISR);
+ 
+    
+    
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     // Set up who am i register
     slaveBuffer[2] = 0xBC;
