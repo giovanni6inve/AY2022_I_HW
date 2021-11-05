@@ -24,6 +24,7 @@ CY_ISR(Custom_Timer_Count_ISR)
     // Increment counter in slave buffer
     
     if ((flag_sample_ch0==1) &( flag_sample_ch1 == 1)){
+        if (slaveBuffer[1]==1) AMux_Select(0);
 
         value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
         
@@ -35,26 +36,74 @@ CY_ISR(Custom_Timer_Count_ISR)
             }
             sum= sum/5.0;
             slaveBuffer[3]=(sum & 0xFFFF) >>8;
-            slaveBuffer[4]= sum  & 0xFF;   
-            AMux_FastSelect(1);
+            slaveBuffer[4]= sum  & 0xFF;    //vanno comunicati ogni 50Hz
+            AMux_Select(1);
             sum=0;
         }
         
         if (slaveBuffer[1]==9){
-            for ( volatile int i=6;i<11;i++){
-                sum += value_digit[i];
+            for (int j=6;j<11;j++){
+                sum += value_digit[j];
             }
             
             sum= sum/5.0;
             slaveBuffer[5]=(sum & 0xFFFF) >>8;
             slaveBuffer[6]= sum & 0xFF;            
-            AMux_FastSelect(0);
+            AMux_Select(0);
             sum=0;
             slaveBuffer[1]=0;
         }
     
     
     }
+    
+    if ((flag_sample_ch0==1) &( flag_sample_ch1 == 0)){
+        AMux_Select(0);
+        value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
+        
+        
+        
+        if (slaveBuffer[1]==4){
+            for (int i=1;i<6;i++){
+                sum += value_digit[i];
+            }
+            sum= sum/5.0;
+            slaveBuffer[3]=(sum & 0xFFFF) >>8;
+            slaveBuffer[4]= sum  & 0xFF;   
+            sum=0;
+            slaveBuffer[1]=0;
+        }
+        
+        
+    
+    }
+    
+    if ((flag_sample_ch0==0) &( flag_sample_ch1 == 1)){
+        AMux_Select(1);
+        value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
+        
+        
+        
+        if (slaveBuffer[1]==4){
+            for (int i=1;i<6;i++){
+                sum += value_digit[i];
+            }
+            sum= sum/5.0;
+            slaveBuffer[3]=(sum & 0xFFFF) >>8;
+            slaveBuffer[4]= sum  & 0xFF;   
+            sum=0;
+            slaveBuffer[1]=0;
+        }
+        
+        
+    
+    }    
+    
+    if ((flag_sample_ch0==0) &( flag_sample_ch1 == 0)){
+        //Stop ADC or do nothing?         
+        
+    
+    }    
     
         
     

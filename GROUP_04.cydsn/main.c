@@ -20,9 +20,10 @@ int main(void)
     /* Enable global interrupts. */
     CyGlobalIntEnable;
     
+    isr_Timer_StartEx(Custom_Timer_Count_ISR);
+        
     Timer_ADC_Start();
     
-    isr_Timer_StartEx(Custom_Timer_Count_ISR);
     
     /* Start EZI2C Component */
     EZI2C_Start();
