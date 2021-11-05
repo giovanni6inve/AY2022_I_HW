@@ -14,17 +14,57 @@
 
 extern uint8_t slaveBuffer[];
 uint8_t flag_sample_ch0, flag_sample_ch1;    
+int32 value_digit[10];
 
+int32 sum=0;
 CY_ISR(Custom_Timer_Count_ISR)
 {
     // Read timer status register to pull interrupt line low
     Timer_ADC_ReadStatusRegister();
     // Increment counter in slave buffer
+    
+    if (flag_sample_ch0==1 & flag_sample_ch1 == 1){
+
+        value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
+        
+        
+        
+        if (slaveBuffer[1]==4){
+            for (int i=1;i<6;i++){
+                sum += value_digit[i];
+            }
+            sum= sum/5.0;
+            slaveBuffer[3]=(sum & 0xFFFF) >>8;
+            slaveBuffer[4]= sum & 0xFF;   
+            AMux_FastSelect(1);
+            sum=0;
+        }
+        
+        if (slaveBuffer[1]==9){
+            for (int i=6;i<11;i++){
+                sum += value_digit[i];
+            }
+            sum= sum/5.0;
+            slaveBuffer[5]=(sum & 0xFFFF) >>8;
+            slaveBuffer[6]= sum & 0xFF;            
+            AMux_FastSelect(0);
+            sum=0;
+            slaveBuffer[1]=0;
+        }
+    
+    
+    }
+    
+        
+    
     slaveBuffer[1]++;
 }
 
 void EZI2C_ISR_ExitCallback(void)
-{
+{   
+    
+    
+    slaveBuffer[1]=0;
     switch (slaveBuffer[0] & 0b11){
     case 0b00: //LED off and stop sampling
         Pin_LED_Write(0);
