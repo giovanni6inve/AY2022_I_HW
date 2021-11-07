@@ -13,7 +13,12 @@
 #include "InterruptRoutines.h"
 
 #define SLAVE_BUFFER_SIZE 7
+#define cinque 0b0101
+
+#define stop 0b00
+
 uint8_t slaveBuffer[SLAVE_BUFFER_SIZE];
+int32 value_digit[11];
 
 int main(void)
 {
@@ -36,8 +41,9 @@ int main(void)
     
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     // Set up who am i register
-    slaveBuffer[2] = 0xBC;
+    slaveBuffer[0] = cinque << 1 | stop;
     slaveBuffer[1] = 1;
+    slaveBuffer[2] = 0xBC;
     slaveBuffer[3]=0;
     slaveBuffer[4]=0;
     slaveBuffer[5]=0;
