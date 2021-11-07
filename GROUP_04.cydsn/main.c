@@ -29,6 +29,7 @@ int main(void)
     EZI2C_Start();
    
     AMux_Start();
+    AMux_Select(0);
     ADC_DelSig_Start();
  
     

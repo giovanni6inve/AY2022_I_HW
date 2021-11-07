@@ -14,7 +14,7 @@
 
 extern uint8_t slaveBuffer[];
 uint8_t flag_sample_ch0, flag_sample_ch1;    
-int32 value_digit[10];
+int32 value_digit[11];
 
 int32 sum=0;
 CY_ISR(Custom_Timer_Count_ISR)
@@ -37,10 +37,10 @@ CY_ISR(Custom_Timer_Count_ISR)
             sum= sum/5.0;
             slaveBuffer[3]=(sum & 0xFFFF) >>8;
             slaveBuffer[4]= sum  & 0xFF;    //vanno comunicati ogni 50Hz
-            AMux_Select(1);
+            //AMux_Select(1);
             sum=0;
         }
-        
+        if (slaveBuffer[1]==6) AMux_Select(1);
         if (slaveBuffer[1]==10){
             for (int j=6;j<11;j++){
                 sum += value_digit[j];
@@ -49,7 +49,7 @@ CY_ISR(Custom_Timer_Count_ISR)
             sum= sum/5.0;
             slaveBuffer[5]=(sum & 0xFFFF) >>8; 
             slaveBuffer[6]= sum & 0xFF;            
-            AMux_Select(0);
+            //AMux_Select(0);
             sum=0;
             slaveBuffer[1]=0;
         }
@@ -76,6 +76,7 @@ CY_ISR(Custom_Timer_Count_ISR)
             slaveBuffer[4]= sum  & 0xFF;   
             sum=0;        
             slaveBuffer[1]=0;
+            //AMux_Select(0);
         }    
         
         
@@ -100,13 +101,18 @@ CY_ISR(Custom_Timer_Count_ISR)
             slaveBuffer[6]= sum  & 0xFF;   
             sum=0;        
             slaveBuffer[1]=0;
+            //AMux_Select(0);
         }    
     
     }    
     
     if ((flag_sample_ch0==0) &( flag_sample_ch1 == 0)){
         //Stop ADC or do nothing?         
-        
+        slaveBuffer[3]=0;
+        slaveBuffer[4]=0;
+        slaveBuffer[5]=0;
+        slaveBuffer[6]=0;
+        //AMux_Select(0);
     
     }    
     
