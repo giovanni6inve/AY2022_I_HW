@@ -37,6 +37,10 @@ int main(void)
     // Set up who am i register
     slaveBuffer[2] = 0xBC;
     slaveBuffer[1] = 1;
+    slaveBuffer[3]=0;
+    slaveBuffer[4]=0;
+    slaveBuffer[5]=0;
+    slaveBuffer[6]=0;
     EZI2C_SetBuffer1(SLAVE_BUFFER_SIZE, 2 ,slaveBuffer); //2 is the first read only byte in array
     
     for(;;)
