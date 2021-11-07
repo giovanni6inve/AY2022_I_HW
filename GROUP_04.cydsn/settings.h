@@ -9,5 +9,13 @@
  *
  * ========================================
 */
-void settings(uint8_t flag_sample_ch0, uint8_t flag_sample_ch1, uint8_t Nsamples);
+#ifndef __SETTINGS_H
+    
+    #define __SETTINGS_H
+    
+    extern int flag_sample_ch0, flag_sample_ch1, Nsamples;
+    
+    void settings(int flag_sample_ch0, int flag_sample_ch1, int Nsamples); //uint8_t
+    
+#endif
 /* [] END OF FILE */

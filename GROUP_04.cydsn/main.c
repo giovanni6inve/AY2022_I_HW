@@ -19,6 +19,7 @@
 
 uint8_t slaveBuffer[SLAVE_BUFFER_SIZE];
 int32 value_digit[11];
+int flag_sample_ch0, flag_sample_ch1, Nsamples;
 
 int main(void)
 {
@@ -41,7 +42,7 @@ int main(void)
     
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     // Set up who am i register
-    slaveBuffer[0] = cinque << 1 | stop;
+    slaveBuffer[0] = cinque << 2 | stop;
     slaveBuffer[1] = 1;
     slaveBuffer[2] = 0xBC;
     slaveBuffer[3]=0;

@@ -9,12 +9,16 @@
  *
  * ========================================
 */
+#include "settings.h"
 #include "project.h"
 extern uint8_t slaveBuffer[];
 extern int32 value_digit[11];
+int32 sum=0;
+//extern uint8_t flag_sample_ch0, flag_sample_ch1, Nsamples;
 
 void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
-    //timer    
+    //timer
+    Nsamples=(slaveBuffer[0] >> 2) & 0b1111;
     if ((flag_sample_ch0==1) &( flag_sample_ch1 == 1)){
         if (slaveBuffer[1]==1) AMux_Select(0);
 
@@ -108,5 +112,6 @@ void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
     
     }    
     
+    slaveBuffer[1]++;
 }
 /* [] END OF FILE */

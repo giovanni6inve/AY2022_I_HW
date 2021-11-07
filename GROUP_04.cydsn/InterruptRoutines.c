@@ -17,7 +17,7 @@
 #define ch1 0b10
 #define both 0b11
 extern uint8_t slaveBuffer[];
-uint8_t flag_sample_ch0, flag_sample_ch1, Nsamples;    
+extern int flag_sample_ch0, flag_sample_ch1, Nsamples;    
 extern int32 value_digit[11];
 int32 sum=0;
 
@@ -25,103 +25,9 @@ CY_ISR(Custom_Timer_Count_ISR)
 {
     // Read timer status register to pull interrupt line low
     Timer_ADC_ReadStatusRegister();
+    Nsamples=5;
+    settings(flag_sample_ch0, flag_sample_ch1, Nsamples);
     
-    if ((flag_sample_ch0==1) &( flag_sample_ch1 == 1)){
-        if (slaveBuffer[1]==1) AMux_Select(0);
-
-        value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
-        
-        
-        
-        if (slaveBuffer[1]==5){
-            for (int i=1;i<6;i++){
-                sum += value_digit[i];
-            }
-            sum= sum/5.0;
-            slaveBuffer[3]=(sum & 0xFFFF) >>8;
-            slaveBuffer[4]= sum  & 0xFF;    //vanno comunicati ogni 50Hz
-            //AMux_Select(1);
-            sum=0;
-        }
-        if (slaveBuffer[1]==6) AMux_Select(1);
-        if (slaveBuffer[1]==10){
-            for (int j=6;j<11;j++){
-                sum += value_digit[j];
-            }
-            
-            sum= sum/5.0;
-            slaveBuffer[5]=(sum & 0xFFFF) >>8; 
-            slaveBuffer[6]= sum & 0xFF;            
-            //AMux_Select(0);
-            sum=0;
-            slaveBuffer[1]=0;
-        }
-    
-    
-    }
-    
-    if ((flag_sample_ch0==1) &( flag_sample_ch1 == 0)){
-        AMux_Select(0);
-        value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
-        slaveBuffer[5]=0;
-        slaveBuffer[6]=0;
-        
-        
-        if (slaveBuffer[1]==5){
-            for (int i=1;i<6;i++){
-                sum += value_digit[i];
-            }
-            sum= sum/5.0;
-
-        }
-        if (slaveBuffer[1]==10)  {  
-            slaveBuffer[3]=(sum & 0xFFFF) >>8;
-            slaveBuffer[4]= sum  & 0xFF;   
-            sum=0;        
-            slaveBuffer[1]=0;
-            //AMux_Select(0);
-        }    
-        
-        
-    
-    }
-    
-    if ((flag_sample_ch0==0) &( flag_sample_ch1 == 1)){
-        AMux_Select(1);
-        value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
-        slaveBuffer[3]=0;
-        slaveBuffer[4]=0;
-        
-        
-        if (slaveBuffer[1]==5){
-            for (int i=1;i<6;i++){
-                sum += value_digit[i];
-            }
-            sum= sum/5.0;
-        }
-        if (slaveBuffer[1]==10)  {  
-            slaveBuffer[5]=(sum & 0xFFFF) >>8;
-            slaveBuffer[6]= sum  & 0xFF;   
-            sum=0;        
-            slaveBuffer[1]=0;
-            //AMux_Select(0);
-        }    
-    
-    }    
-    
-    if ((flag_sample_ch0==0) &( flag_sample_ch1 == 0)){
-        //Stop ADC or do nothing?         
-        slaveBuffer[3]=0;
-        slaveBuffer[4]=0;
-        slaveBuffer[5]=0;
-        slaveBuffer[6]=0;
-        //AMux_Select(0);
-    
-    }    
-    
-        
-    
-    slaveBuffer[1]++;
 }
 
 void EZI2C_ISR_ExitCallback(void)
@@ -151,6 +57,6 @@ void EZI2C_ISR_ExitCallback(void)
     break;
     }
     
-    settings(flag_sample_ch0, flag_sample_ch1, Nsamples);
+    //settings(flag_sample_ch0, flag_sample_ch1, Nsamples);
 } //to write a different num of samples to avg you need to give a hex number for the whole control register 0 so to write ...
 /* [] END OF FILE */
