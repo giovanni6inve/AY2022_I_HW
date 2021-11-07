@@ -14,11 +14,11 @@
 
 #define SLAVE_BUFFER_SIZE 7
 #define cinque 0b0101
-
 #define stop 0b00
+#define max_samples 15
 
 uint8_t slaveBuffer[SLAVE_BUFFER_SIZE];
-int32 value_digit[11];
+int32 value_digit[max_samples*2+1];
 //int flag_sample_ch0, flag_sample_ch1, Nsamples;
 
 int main(void)

@@ -16,9 +16,10 @@
 #define ch0 0b01
 #define ch1 0b10
 #define both 0b11
+#define max_samples 15
 extern uint8_t slaveBuffer[];
 int flag_ch0, flag_ch1, Nsample;    
-extern int32 value_digit[11];
+extern int32 value_digit[max_samples*2+1];
 
 
 CY_ISR(Custom_Timer_Count_ISR)

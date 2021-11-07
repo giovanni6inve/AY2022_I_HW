@@ -14,8 +14,9 @@
 #define overflow 65535
 #define freq 50
 #define Period_Timer_ADC 10*10^(-3) 
+#define max_samples 15
 extern uint8_t slaveBuffer[];
-extern int32 value_digit[11];
+extern int32 value_digit[max_samples*2+1];
 int32 sum=0;
 uint16 nReset;
 //extern uint8_t flag_sample_ch0, flag_sample_ch1, Nsamples;
