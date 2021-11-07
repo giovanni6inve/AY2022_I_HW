@@ -19,7 +19,7 @@
 
 uint8_t slaveBuffer[SLAVE_BUFFER_SIZE];
 int32 value_digit[11];
-int flag_sample_ch0, flag_sample_ch1, Nsamples;
+//int flag_sample_ch0, flag_sample_ch1, Nsamples;
 
 int main(void)
 {

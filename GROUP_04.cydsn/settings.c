@@ -11,14 +11,22 @@
 */
 #include "settings.h"
 #include "project.h"
+#define overflow 65535
+#define freq 50
+#define Period_Timer_ADC 10*10^(-3) 
 extern uint8_t slaveBuffer[];
 extern int32 value_digit[11];
 int32 sum=0;
+uint16 nReset;
 //extern uint8_t flag_sample_ch0, flag_sample_ch1, Nsamples;
 
-void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
-    //timer
-    Nsamples=(slaveBuffer[0] >> 2) & 0b1111;
+    void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
+    Timer_ADC_Stop();
+    nReset=overflow - overflow/(2*Nsamples*freq*Period_Timer_ADC);
+    //Timer_ADC_WritePeriod(100);
+    Timer_ADC_WriteCounter(nReset);
+    Timer_ADC_Enable();
+
     if ((flag_sample_ch0==1) &( flag_sample_ch1 == 1)){
         if (slaveBuffer[1]==1) AMux_Select(0);
 
@@ -26,26 +34,24 @@ void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
         
         
         
-        if (slaveBuffer[1]==5){
-            for (int i=1;i<6;i++){
+        if (slaveBuffer[1]==Nsamples){
+            for (int i=1;i<=Nsamples;i++){
                 sum += value_digit[i];
             }
-            sum= sum/5.0;
+            sum= sum/Nsamples;
             slaveBuffer[3]=(sum & 0xFFFF) >>8;
             slaveBuffer[4]= sum  & 0xFF;    //vanno comunicati ogni 50Hz
-            //AMux_Select(1);
             sum=0;
+            AMux_Select(1);
         }
-        if (slaveBuffer[1]==6) AMux_Select(1);
-        if (slaveBuffer[1]==10){
-            for (int j=6;j<11;j++){
+        if (slaveBuffer[1]==Nsamples*2){
+            for (int j=Nsamples+1;j<=Nsamples*2;j++){
                 sum += value_digit[j];
             }
             
-            sum= sum/5.0;
+            sum= sum/Nsamples;
             slaveBuffer[5]=(sum & 0xFFFF) >>8; 
             slaveBuffer[6]= sum & 0xFF;            
-            //AMux_Select(0);
             sum=0;
             slaveBuffer[1]=0;
         }
@@ -60,19 +66,18 @@ void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
         slaveBuffer[6]=0;
         
         
-        if (slaveBuffer[1]==5){
-            for (int i=1;i<6;i++){
+        if (slaveBuffer[1]==Nsamples){
+            for (int i=1;i<=Nsamples;i++){
                 sum += value_digit[i];
             }
-            sum= sum/5.0;
+            sum= sum/Nsamples;
 
         }
-        if (slaveBuffer[1]==10)  {  
+        if (slaveBuffer[1]==2*Nsamples)  {  
             slaveBuffer[3]=(sum & 0xFFFF) >>8;
             slaveBuffer[4]= sum  & 0xFF;   
             sum=0;        
             slaveBuffer[1]=0;
-            //AMux_Select(0);
         }    
         
         
@@ -86,18 +91,17 @@ void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
         slaveBuffer[4]=0;
         
         
-        if (slaveBuffer[1]==5){
-            for (int i=1;i<6;i++){
+        if (slaveBuffer[1]==Nsamples){
+            for (int i=1;i<=Nsamples;i++){
                 sum += value_digit[i];
             }
-            sum= sum/5.0;
+            sum= sum/Nsamples;
         }
-        if (slaveBuffer[1]==10)  {  
+        if (slaveBuffer[1]==2*Nsamples)  {  
             slaveBuffer[5]=(sum & 0xFFFF) >>8;
             slaveBuffer[6]= sum  & 0xFF;   
             sum=0;        
             slaveBuffer[1]=0;
-            //AMux_Select(0);
         }    
     
     }    
@@ -108,7 +112,6 @@ void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
         slaveBuffer[4]=0;
         slaveBuffer[5]=0;
         slaveBuffer[6]=0;
-        //AMux_Select(0);
     
     }    
     
