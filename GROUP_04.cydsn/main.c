@@ -13,51 +13,49 @@
 #include "InterruptRoutines.h"
 #include "settings.h"
 
-#define SLAVE_BUFFER_SIZE 7
-#define cinque 0b0101
+#define SLAVE_BUFFER_SIZE 7 //CONTROL REGISTER 0, CONTROL REGISTER 1, WHO AM I, ch0 MSB, ch0 LSB, ch1 MSB, ch1 LSB
+#define cinque 0b0101 //as required this is the default number of samples to average per sensor at 50Hz
 #define stop 0b00
-#define max_samples 15
+#define max_samples 15 //having 4 r/w bits in the CONTROL REGISTER 0 to specify the number of samples (within 50Hz to average) these may vary between 1 and 15
+#define who_am_I 0xBC
+uint8_t slaveBuffer[SLAVE_BUFFER_SIZE]; //contains the slave's registers: CONTROL REGISTER 0, CONTROL REGISTER 1, MSB and LSB of channel 0 and MSB and LSB of channel 1 (notice: this is the correct order to communicate 16 bit values by I2C)
+int32 value_digit[max_samples*2]; //with 4 bits to do so 15 samples to averge may be desired at most, since it is for 2 sensors 30 
 
-uint8_t slaveBuffer[SLAVE_BUFFER_SIZE];
-int32 value_digit[max_samples*2+1];
-uint8 flag_avgOVF=0;
-
-//int flag_sample_ch0, flag_sample_ch1, Nsamples;
 
 int main(void)
 {
     /* Enable global interrupts. */
     CyGlobalIntEnable;
     
+    //enable custom interrupt
     isr_Timer_StartEx(Custom_Timer_Count_ISR);
-        
-    Timer_ADC_Start();
     
+    AMux_Start(); //start digital multiplexer component
+    AMux_Select(0); //set to ch0 initially
     
-    /* Start EZI2C Component */
+    ADC_DelSig_Start(); //start ADC delta sigma 
+    Timer_ADC_Start(); //start timer only after its ISR is enabled and the components it will require are started
+    
+    /* Start EZI2C Component for communication only when all other components are started*/
     EZI2C_Start();
    
-    AMux_Start();
-    AMux_Select(0);
-    ADC_DelSig_Start();
- 
     
-    slaveBuffer[0] = cinque << 2 | stop;
-    slaveBuffer[1] = 1;
-    slaveBuffer[2] = 0xBC; //who am I set up
-    slaveBuffer[3]=0;
-    slaveBuffer[4]=0;
-    slaveBuffer[5]=0;
-    slaveBuffer[6]=0;
-    EZI2C_SetBuffer1(SLAVE_BUFFER_SIZE, 2 ,slaveBuffer); //2 is the first read only byte in arra
+ 
+    //initialize the slave buffer (slave's registers)
+    slaveBuffer[0] = cinque << 2 | stop; //5 samples to average but no channels to sample
+    slaveBuffer[1] = 20; //start the CONTROL REGISTER 1 (timer's counter) at 1 initially since it will then be reset to 0 and immediately summed by 1 during ordinary functioning (after initial cycle)
+    slaveBuffer[2] = who_am_I; //who am I set up, necessary for the master (and the user) to recognize the slave connected to I2C bus (at most 127 since 7 bit addresses)
+    slaveBuffer[3]=0; //ch0 MSB initialized at 0
+    slaveBuffer[4]=0; //ch0 LSB initialized at 0
+    slaveBuffer[5]=0; //ch1 MSB initialized at 0
+    slaveBuffer[6]=0; //ch1 LSB initialized at 0
+    
+    /*initialize I2C communication, inputs: number of slave's registers, nuber or read-only registers 
+    starting from the first one, actual slave buffer which will be updated in the settings function*/
+    EZI2C_SetBuffer1(SLAVE_BUFFER_SIZE, 2 ,slaveBuffer);
     for(;;)
     {
-       if (flag_avgOVF==1){
-        Pin_avgOVF_Write(1);
-        CyDelay(1000);
-        Pin_avgOVF_Write(0);
-    }
-        /* Place your application code here. */
+             
     }
 }
 
