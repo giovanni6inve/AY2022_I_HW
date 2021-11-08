@@ -11,6 +11,7 @@
 */
 #include "project.h"
 #include "InterruptRoutines.h"
+#include "settings.h"
 
 #define SLAVE_BUFFER_SIZE 7
 #define cinque 0b0101
@@ -19,6 +20,8 @@
 
 uint8_t slaveBuffer[SLAVE_BUFFER_SIZE];
 int32 value_digit[max_samples*2+1];
+uint8 flag_avgOVF=0;
+
 //int flag_sample_ch0, flag_sample_ch1, Nsamples;
 
 int main(void)
@@ -39,12 +42,9 @@ int main(void)
     ADC_DelSig_Start();
  
     
-    
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
-    // Set up who am i register
     slaveBuffer[0] = cinque << 2 | stop;
     slaveBuffer[1] = 1;
-    slaveBuffer[2] = 0xBC;
+    slaveBuffer[2] = 0xBC; //who am I set up
     slaveBuffer[3]=0;
     slaveBuffer[4]=0;
     slaveBuffer[5]=0;
@@ -52,6 +52,11 @@ int main(void)
     EZI2C_SetBuffer1(SLAVE_BUFFER_SIZE, 2 ,slaveBuffer); //2 is the first read only byte in arra
     for(;;)
     {
+       if (flag_avgOVF==1){
+        Pin_avgOVF_Write(1);
+        CyDelay(1000);
+        Pin_avgOVF_Write(0);
+    }
         /* Place your application code here. */
     }
 }

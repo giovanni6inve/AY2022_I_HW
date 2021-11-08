@@ -252,6 +252,8 @@
   <Group key="DWRInstGuidMapping">
     <Group key="Pin">
       <Data key="4e82395a-3b54-47e0-8dc4-2263efc99980" value="Pin_LDR" />
+      <Data key="8d6ba0cc-20d2-48da-b78d-bc7ccc7ea818" value="Pin_avgOVF" />
+      <Data key="9e154fc0-72b3-4916-be16-565b29bdd0c5" value="Pin_avgOVF" />
       <Data key="34cfed22-c960-4363-8ecf-2f6fc0d15200" value="Pin_I2C" />
       <Data key="77715107-f8d5-47e5-a629-0fb83101ac6b" value="Pin_Temp" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="Pin_LED" />
@@ -3344,6 +3346,16 @@
     <Group key="4e82395a-3b54-47e0-8dc4-2263efc99980">
       <Group key="0">
         <Data key="Port Format" value="2,6" />
+      </Group>
+    </Group>
+    <Group key="8d6ba0cc-20d2-48da-b78d-bc7ccc7ea818">
+      <Group key="0">
+        <Data key="Port Format" value="1,6" />
+      </Group>
+    </Group>
+    <Group key="9e154fc0-72b3-4916-be16-565b29bdd0c5">
+      <Group key="0">
+        <Data key="Port Format" value="1,6" />
       </Group>
     </Group>
     <Group key="34cfed22-c960-4363-8ecf-2f6fc0d15200">

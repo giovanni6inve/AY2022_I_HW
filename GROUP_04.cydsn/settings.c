@@ -17,6 +17,7 @@
 #define max_samples 15
 extern uint8_t slaveBuffer[];
 extern int32 value_digit[max_samples*2+1];
+extern uint8 flag_avgOVF;
 int32 sum=0;
 uint16 nReset;
 //extern uint8_t flag_sample_ch0, flag_sample_ch1, Nsamples;
@@ -32,7 +33,8 @@ uint16 nReset;
         if (slaveBuffer[1]==1) AMux_Select(0);
 
         value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
-        
+        if (value_digit[slaveBuffer[1]]>65535) value_digit[slaveBuffer[1]]=65535;
+        if (value_digit[slaveBuffer[1]]<0) value_digit[slaveBuffer[1]]=0; //for robustness
         
         
         if (slaveBuffer[1]==Nsamples){
@@ -40,8 +42,13 @@ uint16 nReset;
                 sum += value_digit[i];
             }
             sum= sum/Nsamples;
+            if (sum>65535) {
+                sum=65535;
+                flag_avgOVF=1;  //invalid value
+            }
+            
             slaveBuffer[3]=(sum & 0xFFFF) >>8;
-            slaveBuffer[4]= sum  & 0xFF;    //vanno comunicati ogni 50Hz
+            slaveBuffer[4]= sum  & 0xFF;    
             sum=0;
             AMux_Select(1);
         }
@@ -51,6 +58,11 @@ uint16 nReset;
             }
             
             sum= sum/Nsamples;
+            if (sum>65535) {
+                sum=65535;
+                flag_avgOVF=1;  
+            }
+            
             slaveBuffer[5]=(sum & 0xFFFF) >>8; 
             slaveBuffer[6]= sum & 0xFF;            
             sum=0;
@@ -62,7 +74,11 @@ uint16 nReset;
     
     if ((flag_sample_ch0==1) &( flag_sample_ch1 == 0)){
         AMux_Select(0);
+        
         value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
+        if (value_digit[slaveBuffer[1]]>65535) value_digit[slaveBuffer[1]]=65535;
+        if (value_digit[slaveBuffer[1]]<0) value_digit[slaveBuffer[1]]=0;
+        
         slaveBuffer[5]=0;
         slaveBuffer[6]=0;
         
@@ -72,6 +88,10 @@ uint16 nReset;
                 sum += value_digit[i];
             }
             sum= sum/Nsamples;
+            if (sum>65535) {
+                sum=65535;
+                flag_avgOVF=1;  
+            }
 
         }
         if (slaveBuffer[1]==2*Nsamples)  {  
@@ -87,7 +107,11 @@ uint16 nReset;
     
     if ((flag_sample_ch0==0) &( flag_sample_ch1 == 1)){
         AMux_Select(1);
+        
         value_digit[slaveBuffer[1]] = ADC_DelSig_Read32();
+        if (value_digit[slaveBuffer[1]]>65535) value_digit[slaveBuffer[1]]=65535;
+        if (value_digit[slaveBuffer[1]]<0) value_digit[slaveBuffer[1]]=0;        
+        
         slaveBuffer[3]=0;
         slaveBuffer[4]=0;
         
@@ -97,6 +121,11 @@ uint16 nReset;
                 sum += value_digit[i];
             }
             sum= sum/Nsamples;
+            if (sum>65535) {
+                sum=65535;
+                flag_avgOVF=1;  
+            }
+            
         }
         if (slaveBuffer[1]==2*Nsamples)  {  
             slaveBuffer[5]=(sum & 0xFFFF) >>8;
