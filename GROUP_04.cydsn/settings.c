@@ -29,10 +29,12 @@ extern int32 value_digit[max_samples*2];//with 4 bits to do so 15 samples to ave
 uint8 flag_avgOVF;
 uint32 count_LEDovf=0;
 int32 sum=0, sum_0=0;
+
+
 //uint32_t* sum_temp = (int*)(&sum_0);
 //uint32_t* sum_ldr = (int*)(&sum);
 
-uint8 count=-1;
+int8 count=-1;
 
                // Test value
    
@@ -40,10 +42,12 @@ uint8 count=-1;
     writes the registers of the slave buffer with the avg sample values and sets the timer and the ADC in 
     order to satisfy the requirements set by these parameters */
     void settings(int flag_sample_ch0, int flag_sample_ch1, int Nsamples){
-    
+   
+        
     /* set the timer's period according to the number of samples to average each 50Hz per channel*/
     Timer_ADC_Stop(); //stop the timer to reset the period
     slaveBuffer[1]= clk_freq/(comm_freq*2*Nsamples); //sampling is done at each timer's overflow so its period is set thus
+    
     //period changes when the counter is reloded so we are sure the timer counts from 0 to overflow
     Timer_ADC_WritePeriod(slaveBuffer[1]); //done following ISR's (calls function settings) interrogation of what is written in the Bridge Control Panel
     Timer_ADC_Enable(); //reactivates timer once period is changed
@@ -213,7 +217,6 @@ uint8 count=-1;
         count=-1; //in case the status bits are reset during any other configuration of them and not exactly at the cycle's end
     }    
     
-    count++; //increase the count for each ISR on timer overflow
 
 //LED to warn the user of register overflow
     if (flag_avgOVF==1){      //if either the sum of ch1 or ch0 samples overflows (goes beyond 655535) 
@@ -227,12 +230,7 @@ uint8 count=-1;
     }
 }
 /* [] END OF FILE */
-    
-    
-    
-    
- 
- // get "bits view" of test value
+
 
 
     

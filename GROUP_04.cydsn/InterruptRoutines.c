@@ -18,8 +18,9 @@
 #define both 0b11
 #define max_samples 15 //having 4 r/w bits in the CONTROL REGISTER 0 to specify the number of samples (within 50Hz to average) these may vary between 1 and 15
 extern uint8_t slaveBuffer[]; //contains the slave's registers: CONTROL REGISTER 0, CONTROL REGISTER 1, MSB and LSB of channel 0 and MSB and LSB of channel 1 (notice: this is the correct order to communicate 16 bit values by I2C)
-int flag_ch0, flag_ch1, Nsample;    
+int flag_ch0, flag_ch1, Nsample, flag_ch0_temp, flag_ch1_temp;    
 extern int32 value_digit[max_samples*2]; //with 4 bits to do so 15 samples to averge may be desired at most, since it is for 2 sensors 30 
+extern int8 count; //increased at each ISR and reset to -1 (and immediately increased to 0) only when a cycle (update of slave buffer's averaged samples registes) is comlete
 
 /*to be performed at each timer's overflow (timer's period is set as required by the user-configurable 
 parameters)*/
@@ -28,7 +29,15 @@ CY_ISR(Custom_Timer_Count_ISR)
     //Read timer status register to pull interrupt line low
     Timer_ADC_ReadStatusRegister();
     
-    Nsample = (slaveBuffer[0] >> 2) & 0b1111; //default is 5: 0101
+    /*for robustess the user must wait for a cycle to finish before the required modifications to Nsamples
+    or the status bits take action*/
+    if (count==-1) {
+        Nsample = (slaveBuffer[0] >> 2) & 0b1111; //default is 5: 0101
+        flag_ch0_temp=flag_ch0;
+        flag_ch1_temp=flag_ch1;
+    }
+    count++;
+    
     /*it makes no sense to average 0 samples any input to the bridge control panel's write between 00 and 03 is
     corrected to give the same output as 04 to 07 respectively*/
     /*notice no value above 3f may be given in input to the bridge control manel since the 2 status bits may be
@@ -40,7 +49,7 @@ CY_ISR(Custom_Timer_Count_ISR)
     /*this function takes in input the status: which channels to sample, and how many samples to average and 
     writes the registers of the slave buffer with the avg sample values and sets the timer and the ADC in 
     order to satisfy the requirements set by these parameters */
-    settings(flag_ch0, flag_ch1, Nsample); 
+    settings(flag_ch0_temp, flag_ch1_temp, Nsample); 
     
 }
 
