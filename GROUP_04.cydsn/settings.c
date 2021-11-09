@@ -125,7 +125,7 @@ uint8 count=-1;
         
         
         if (count==Nsamples-1){ 
-            for (int i=1;i<Nsamples;i++){
+            for (int i=0;i<Nsamples;i++){
                 
                 //value_digit[i]=ADC_DelSig_CountsTo_mVolts(value_digit[i]);
                 //value_digit[i]=(value_digit[i]-offset_temp_mv)/coef_temp + offset_temp_c;
@@ -170,7 +170,7 @@ uint8 count=-1;
         
         
         if (count==Nsamples-1){
-            for (int i=1;i<Nsamples;i++){
+            for (int i=0;i<Nsamples;i++){
                 
                 //value_digit[i]=ADC_DelSig_CountsTo_Volts(value_digit[i]);
                 //value_digit[i]=  offset_lux + (delta_lux)*(R*(vcc-value_digit[i])/vcc*(1-(vcc-value_digit[i])/vcc)-offset_ohm)/delta_ohm;
