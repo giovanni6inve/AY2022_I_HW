@@ -39,7 +39,7 @@ uint8 count=-1;
     /*this function takes in input the status: which channels to sample, and how many samples to average and 
     writes the registers of the slave buffer with the avg sample values and sets the timer and the ADC in 
     order to satisfy the requirements set by these parameters */
-    void settings(flag_sample_ch0, flag_sample_ch1, Nsamples){
+    void settings(int flag_sample_ch0, int flag_sample_ch1, int Nsamples){
     
     /* set the timer's period according to the number of samples to average each 50Hz per channel*/
     Timer_ADC_Stop(); //stop the timer to reset the period
@@ -100,12 +100,12 @@ uint8 count=-1;
                 flag_avgOVF=1;  
             }
             
-            slaveBuffer[3]=(sum & 0xFFFF) >>8; //since sum has 32 bits (output of read 32) we must extract here the MSB out of 2 bytes and right adjust it
-            slaveBuffer[4]= sum & 0xFF;   //LSB 
+            slaveBuffer[3]=(sum_0 & 0xFFFF) >>8; //since sum has 32 bits (output of read 32) we must extract here the MSB out of 2 bytes and right adjust it
+            slaveBuffer[4]= sum_0 & 0xFF;   //LSB 
             sum_0=0; //reinitialize for the next 1/50Hz period
             
-            slaveBuffer[5]=(sum_0 & 0xFFFF) >>8; 
-            slaveBuffer[6]= sum_0 & 0xFF;            
+            slaveBuffer[5]=(sum & 0xFFFF) >>8; 
+            slaveBuffer[6]= sum & 0xFF;            
             sum=0; //reinitialize for the next 1/50Hz period
             count=-1; //reinitialize for the next 1/50Hz period
         }
