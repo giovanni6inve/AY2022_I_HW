@@ -21,36 +21,24 @@
 #define offset_ohm 10000000//ohm for LDR calibration
 #define vcc 5//V for LDR calibration
 #define R 10000//ohm for LDR calibration
-#define clk_freq 10000 //Hz this is the frequency of the timer's clock
-#define comm_freq 50 //Hz this is the frequency at which the samples' average must be communicated (updated)
 #define max_samples 15 //having 4 r/w bits in the CONTROL REGISTER 0 to specify the number of samples (within 50Hz to average) these may vary between 1 and 15
 extern uint8_t slaveBuffer[]; //contains the slave's registers: CONTROL REGISTER 0, CONTROL REGISTER 1, MSB and LSB of channel 0 and MSB and LSB of channel 1 (notice: this is the correct order to communicate 16 bit values by I2C)
 extern int32 value_digit[max_samples*2];//with 4 bits to do so 15 samples to averge may be desired at most, since it is for 2 sensors 30 
 uint8 flag_avgOVF;
 uint32 count_LEDovf=0;
 int32 sum=0, sum_0=0;
-
+extern int8 count;
+uint8 i,j;
 
 //uint32_t* sum_temp = (int*)(&sum_0);
 //uint32_t* sum_ldr = (int*)(&sum);
 
-int8 count=-1;
-
-               // Test value
    
     /*this function takes in input the status: which channels to sample, and how many samples to average and 
     writes the registers of the slave buffer with the avg sample values and sets the timer and the ADC in 
     order to satisfy the requirements set by these parameters */
     void settings(int flag_sample_ch0, int flag_sample_ch1, int Nsamples){
    
-        
-    /* set the timer's period according to the number of samples to average each 50Hz per channel*/
-    Timer_ADC_Stop(); //stop the timer to reset the period
-    slaveBuffer[1]= clk_freq/(comm_freq*2*Nsamples); //sampling is done at each timer's overflow so its period is set thus
-    
-    //period changes when the counter is reloded so we are sure the timer counts from 0 to overflow
-    Timer_ADC_WritePeriod(slaveBuffer[1]); //done following ISR's (calls function settings) interrogation of what is written in the Bridge Control Panel
-    Timer_ADC_Enable(); //reactivates timer once period is changed
 
     if ((flag_sample_ch0 == 1) & (flag_sample_ch1 == 1)){ //status 11: built in LED is on and both channels are sampled
         if (count==0) AMux_Select(0); //connect ch0 with the ADC for Nsamples conversions
@@ -64,7 +52,7 @@ int8 count=-1;
         
         
         if (count==Nsamples-1){ //once Nsamples for the ch0 are collected (starting count from 0 Nsamples are obtained at count=Nsamples-1)
-            for (int i=0;i<Nsamples;i++){
+            for (i=0;i<Nsamples;i++){
                 
                 //value_digit[i]=ADC_DelSig_CountsTo_mVolts(value_digit[i]);
                 //value_digit[i]=(value_digit[i]-offset_temp_mv)/coef_temp + offset_temp_c;
@@ -85,7 +73,7 @@ int8 count=-1;
         }
         
         if (count==Nsamples*2-1){ //also the Nsamples for ch1 are collected (we have Nsamples*2 at the count Nsamples*2-1 since count start from 0)
-            for (int j=Nsamples;j<Nsamples*2;j++){
+            for (j=Nsamples;j<Nsamples*2;j++){
                 
                 //value_digit[j]=ADC_DelSig_CountsTo_Volts(value_digit[j]);
                 //value_digit[j]= offset_lux + (delta_lux)*(R*(vcc-value_digit[j])/vcc*(1-(vcc-value_digit[j])/vcc)-offset_ohm)/delta_ohm ; 
@@ -129,7 +117,7 @@ int8 count=-1;
         
         
         if (count==Nsamples-1){ 
-            for (int i=0;i<Nsamples;i++){
+            for (i=0;i<Nsamples;i++){
                 
                 //value_digit[i]=ADC_DelSig_CountsTo_mVolts(value_digit[i]);
                 //value_digit[i]=(value_digit[i]-offset_temp_mv)/coef_temp + offset_temp_c;
@@ -174,7 +162,7 @@ int8 count=-1;
         
         
         if (count==Nsamples-1){
-            for (int i=0;i<Nsamples;i++){
+            for (i=0;i<Nsamples;i++){
                 
                 //value_digit[i]=ADC_DelSig_CountsTo_Volts(value_digit[i]);
                 //value_digit[i]=  offset_lux + (delta_lux)*(R*(vcc-value_digit[i])/vcc*(1-(vcc-value_digit[i])/vcc)-offset_ohm)/delta_ohm;
