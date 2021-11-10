@@ -17,13 +17,13 @@
 #define ch1 0b10
 #define both 0b11
 #define max_samples 15 //having 4 r/w bits in the CONTROL REGISTER 0 to specify the number of samples (within 50Hz to average) these may vary between 1 and 15
-#define clk_freq 10000 //Hz this is the frequency of the timer's clock
+#define clk_freq 100000 //Hz this is the frequency of the timer's clock
 #define comm_freq 50 //Hz this is the frequency at which the samples' average must be communicated (updated)
 extern uint8_t slaveBuffer[]; //contains the slave's registers: CONTROL REGISTER 0, CONTROL REGISTER 1, MSB and LSB of channel 0 and MSB and LSB of channel 1 (notice: this is the correct order to communicate 16 bit values by I2C)
 int flag_ch0, flag_ch1, Nsample, flag_ch0_temp, flag_ch1_temp;    
 extern int32 value_digit[max_samples*2]; //with 4 bits to do so 15 samples to averge may be desired at most, since it is for 2 sensors 30 
 int8 count=-1; //increased at each ISR and reset to -1 (and immediately increased to 0) only when a cycle (update of slave buffer's averaged samples registes) is comlete
-
+int32 period;
 /*to be performed at each timer's overflow (timer's period is set as required by the user-configurable 
 parameters)*/
 CY_ISR(Custom_Timer_Count_ISR) 
@@ -41,16 +41,16 @@ CY_ISR(Custom_Timer_Count_ISR)
         0b11 at most and the 4 ones for the number of samples 0b1111 (15 in dec), this makes 0b111111 which 
         corresponds to 3f in hex*/
         if (Nsample==0) Nsample=1;
-        
+        if (slaveBuffer[1]==0) slaveBuffer[1]=1;//if the user requests a frequency of communication (value update) of 0Hz it is automatically corrected to 1 Hz
         flag_ch0_temp=flag_ch0;
         flag_ch1_temp=flag_ch1;
         
         /* set the timer's period according to the number of samples to average each 50Hz per channel*/
         Timer_ADC_Stop(); //stop the timer to reset the period
-        slaveBuffer[1]= clk_freq/(comm_freq*2*Nsample); //sampling is done at each timer's overflow so its period is set thus
+        period= clk_freq/(slaveBuffer[1]*2*Nsample); //sampling is done at each timer's overflow so its period is set thus
     
         //period changes when the counter is reloded so we are sure the timer counts from 0 to overflow
-        Timer_ADC_WritePeriod(slaveBuffer[1]); //done following ISR's (calls function settings) interrogation of what is written in the Bridge Control Panel
+        Timer_ADC_WritePeriod(period); //done following ISR's (calls function settings) interrogation of what is written in the Bridge Control Panel
         Timer_ADC_Enable(); //reactivates timer once period is changed
     }
     count++;

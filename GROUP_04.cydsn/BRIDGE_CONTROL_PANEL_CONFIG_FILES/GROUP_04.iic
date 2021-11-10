@@ -1,1 +1,21 @@
-w 08 00 3f p w 08 03 p r 08 x x x x p
+; We set the default value of 5 samples and 50 Hz of transmission rate (we have a clock of 5kHz and a period of 20)
+; The user is free to change the desired value from almost 2 up
+; to almost 10 samples modifying the bit devoted to that configuration. The transmission rate can be modified too, and it can vary
+; almost between 10 Hz and 100 Hz.
+; (please just the two lines 'w 08 00 17 p' and 'w 08 01 14 p' are supposed to be modified in order to match your needs. The first eight 
+; lines are supposed to be repeated in order to visualize the data collected on a chart):
+w 08 00 07 p
+W 08 01 07 p
+w 08 03 p 
+r 08 @1temp @0temp @1ldr @0ldr p
+
+
+
+; i.e new_sample_number=4;  F_desired = 25 Hz ---> new_period_value=5000/(25*4)=50;
+
+;the new_period_value must be an integer number and it should be inserted in the register_2 by running the following line:
+;w 08 01 xx p
+;where xx is the .hex value of the new period. 'F' can vary almost from 10 Hz to 100 Hz.
+
+w 08 01 14 p
+.

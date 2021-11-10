@@ -18,6 +18,7 @@
 #define stop 0b00
 #define max_samples 15 //having 4 r/w bits in the CONTROL REGISTER 0 to specify the number of samples (within 50Hz to average) these may vary between 1 and 15
 #define who_am_I 0xBC
+#define communication_freq 50 //Hz this is the frquency at which the sampes' average must be communicated (actually updated) communication is set with a repeat at 3ms period (worst case scenario: 255Hz)
 uint8_t slaveBuffer[SLAVE_BUFFER_SIZE]; //contains the slave's registers: CONTROL REGISTER 0, CONTROL REGISTER 1, MSB and LSB of channel 0 and MSB and LSB of channel 1 (notice: this is the correct order to communicate 16 bit values by I2C)
 int32 value_digit[max_samples*2]; //with 4 bits to do so 15 samples to averge may be desired at most, since it is for 2 sensors 30 
 
@@ -43,7 +44,7 @@ int main(void)
  
     //initialize the slave buffer (slave's registers)
     slaveBuffer[0] = cinque << 2 | stop; //5 samples to average but no channels to sample
-    slaveBuffer[1] = 20; //start the CONTROL REGISTER 1 (timer's counter) at 1 initially since it will then be reset to 0 and immediately summed by 1 during ordinary functioning (after initial cycle)
+    slaveBuffer[1] = communication_freq; //start the CONTROL REGISTER 1 (communication freq, actually value update frequency) at 50hz witch the user can then update to values between 1hz and 255hz considering the 8 bit register 
     slaveBuffer[2] = who_am_I; //who am I set up, necessary for the master (and the user) to recognize the slave connected to I2C bus (at most 127 since 7 bit addresses)
     slaveBuffer[3]=0; //ch0 MSB initialized at 0
     slaveBuffer[4]=0; //ch0 LSB initialized at 0
