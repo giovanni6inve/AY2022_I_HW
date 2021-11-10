@@ -64,7 +64,7 @@ uint8 i,j;
             }
             sum_0= sum_0/Nsamples; //to compute the average
             
-            if (sum_0>65535) { //warn user of invalid value (see below)
+            if (sum_0>=65535) { //warn user of potentially invalid value (see below) since the register is being saturated
                 sum_0=65535;
                 flag_avgOVF=1;  
             }
@@ -87,7 +87,7 @@ uint8 i,j;
             
             sum= sum/Nsamples; //for average computation
             
-            if (sum>65535) {  //warn user of invalid value (see below)
+            if (sum>=65535) {  //warn user of invalid value (see below)
                 sum=65535;
                 flag_avgOVF=1;  
             }
@@ -127,7 +127,7 @@ uint8 i,j;
                 sum_0 += value_digit[i];
             }
             sum_0= sum_0/Nsamples;
-            if (sum_0>65535) { //warn user of invalid value (see below)
+            if (sum_0>=65535) { //warn user of invalid value (see below)
                 sum_0=65535;
                 flag_avgOVF=1;  
             }
@@ -172,7 +172,7 @@ uint8 i,j;
                 sum += value_digit[i];
             }
             sum= sum/Nsamples;
-            if (sum>65535) { //warn user of invalid value (see below)
+            if (sum>=65535) { //warn user of invalid value (see below)
                 sum=65535;
                 flag_avgOVF=1;  
             }

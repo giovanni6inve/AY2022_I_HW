@@ -1,21 +1,103 @@
-; We set the default value of 5 samples and 50 Hz of transmission rate (we have a clock of 5kHz and a period of 20)
-; The user is free to change the desired value from almost 2 up
-; to almost 10 samples modifying the bit devoted to that configuration. The transmission rate can be modified too, and it can vary
-; almost between 10 Hz and 100 Hz.
-; (please just the two lines 'w 08 00 17 p' and 'w 08 01 14 p' are supposed to be modified in order to match your needs. The first eight 
-; lines are supposed to be repeated in order to visualize the data collected on a chart):
-w 08 00 07 p
-W 08 01 07 p
-w 08 03 p 
+
+; scan period can be set to 3 ms considering that the greatest frequency at which the averaged values can be requested to be communicated
+; is of 1/255 Hz= 3.9 ms this value is not required to be changed for different communication frequencies since what is done to accomodate
+; that requirement is to change the frequency at which the channel values in the register (slaveBuffer) are updated, so the actual
+; communication frequency is fixed while the value update frequency can be set by the user.
+;
+; The slave device has addres 08
+;
+; The settable parameters are therefore :
+; -the status bits (which are the 2 least significant bits of the CONTROL REGISTER 0 (register 00 in the slaveBuffer)) which indicate which 
+;  channels to sample and turn le built in LED on in case both channels are to be sampled (2 bits -> 4 configurations);
+; -the number of samples per channel to be averaged within the defined communication period (bits 2-5 -> from 0 to 15, since 0 has no
+;  sense the request is modified to ask for 1 sample per channel) of CONTROL REGISTER 0;
+; -the communication frequency (CONTROL REGISTER 1, register 01 in the slaveBuffer) at which the channels' values (given by the average of 
+;  as many samples as specified above) are to be updated (8 bits so from 0 to 255 (Hz), since 0 makes no sense the request is modified to ask
+;  for frequency = 1 Hz)
+;
+; The register 02 of the sleveBuffer contains the who am I value which is to be compared with the expected one (bc) in order to identify
+; the slave and assure it is the desired one;
+;
+; For greater robustenss to unexpected inturruptions (i.e. I2C callback) the required communication and functioning requirements the user 
+; may request are made effective only after a cycle = timer ISR for status 00 or channel's values update for other status values
+
+; who am I reading: (select both lines)
+w 08 02 
+r 08 x p
+
+; some extreme cases than can be assumed:
+;  communication freq 1, 1 sample to average by writing zeroes instaed of ones (for all status configurations)
+;    no channels
+w 08 00 0 p
+w 08 01 0 p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p ; press repeat only after having selected the last 2 lines and pressed enter, then see chart (same for all)
+
+;    channel 0 temperature (notice the registers are automatically increased from 03 (first MSB, then LSB))
+w 08 00 1 p
+w 08 01 0 p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p
+
+;    channel 1 LDR
+w 08 00 2 p
+w 08 01 0 p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p
+
+;    channel 0 and 1 both, and built in LED on
+w 08 00 3 p
+w 08 01 0 p
+w 08 03 
 r 08 @1temp @0temp @1ldr @0ldr p
 
 
+;  communication freq 255, 15 sample to average (for all status configurations)
+;    no channels
+w 08 00 3c p ;3c ->hex to bin-> 1111 (15 in dec) 00 (2 status bits)
+w 08 01 ff p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p 
 
-; i.e new_sample_number=4;  F_desired = 25 Hz ---> new_period_value=5000/(25*4)=50;
+;    channel 0 temperature 
+w 08 00 3d p
+w 08 01 ff p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p
 
-;the new_period_value must be an integer number and it should be inserted in the register_2 by running the following line:
-;w 08 01 xx p
-;where xx is the .hex value of the new period. 'F' can vary almost from 10 Hz to 100 Hz.
+;    channel 1 LDR
+w 08 00 3e p
+w 08 01 ff p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p
 
-w 08 01 14 p
-.
+;    channel 0 and 1 both, and built in LED on
+w 08 00 3f p
+w 08 01 ff p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p
+
+;  default (standard functioning): communication freq 50 Hz, 5 samples to average (for all status configurations)
+;    no channels
+w 08 00 14 p ;14 ->hex to bin-> 0101 (5 in dec) 00 (2 status bits)
+w 08 01 32 p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p 
+
+;    channel 0 temperature 
+w 08 00 15 p
+w 08 01 32 p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p
+
+;    channel 1 LDR
+w 08 00 16 p
+w 08 01 32 p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p
+
+;    channel 0 and 1 both, and built in LED on
+w 08 00 17 p
+w 08 01 32 p
+w 08 03 
+r 08 @1temp @0temp @1ldr @0ldr p
